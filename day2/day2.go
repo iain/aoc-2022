@@ -20,15 +20,32 @@ var mappings = map[string]Hand{
 	"A": Rock,
 	"B": Paper,
 	"C": Scissors,
-	"X": Rock,
-	"Y": Paper,
-	"Z": Scissors,
 }
 
-var beats = map[Hand]Hand{
+type strategy = map[Hand]Hand
+
+var beats = strategy{
 	Rock:     Scissors,
 	Scissors: Paper,
 	Paper:    Rock,
+}
+
+var loses = strategy{
+	Rock:     Paper,
+	Paper:    Scissors,
+	Scissors: Rock,
+}
+
+var draw = strategy{
+	Rock:     Rock,
+	Paper:    Paper,
+	Scissors: Scissors,
+}
+
+var response = map[string]strategy{
+	"X": beats,
+	"Y": draw,
+	"Z": loses,
 }
 
 type Round struct {
@@ -85,7 +102,7 @@ func getRounds(filename string) []Round {
 			// two
 			abs := strings.Fields(line)
 			opp := mappings[abs[0]]
-			you := mappings[abs[1]]
+			you := response[abs[1]][opp]
 			rounds = append(rounds, Round{Opponent: opp, You: you})
 		}
 	}
