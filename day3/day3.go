@@ -6,13 +6,61 @@ import (
 	"strings"
 )
 
-// var priorities = map[string]int{
-// 	"a": 1,
-// }
-
 func Main() {
 	fmt.Println("Day 3")
+	Part1()
+	Part2()
+}
 
+type Group [3]string
+
+func Part2() {
+	groups := []Group{}
+	group := Group{}
+	lines := shared.ReadLines("data/day3.input")
+	for i, line := range lines {
+		group[i%3] = line
+		if i%3 == 2 {
+			groups = append(groups, group)
+			group = Group{}
+		}
+	}
+	fmt.Println("Groups:", groups)
+
+	sum := 0
+
+	for _, group := range groups {
+		badge := group.findBadge()
+		fmt.Println("Group:", group, "Badge:", badge)
+		sum += toPriority(badge)
+	}
+
+	fmt.Println("Sum badges:", sum)
+
+}
+
+// naive approach loops multiple times over everything
+// first make into map, for easy access
+// then loop over 1 only?
+func (g Group) findBadge() string {
+	for _, char := range g[0] {
+		if containsRune(g[1], char) && containsRune(g[2], char) {
+			return string(char)
+		}
+	}
+	return ""
+}
+
+func containsRune(haystack string, needle rune) bool {
+	for _, item := range haystack {
+		if item == needle {
+			return true
+		}
+	}
+	return false
+}
+
+func Part1() {
 	dupes := []string{}
 
 	lines := shared.ReadLines("data/day3.input")
@@ -25,12 +73,12 @@ func Main() {
 		dupes = append(dupes, findDupes(left, right)...)
 	}
 
-	fmt.Println("Dupes:", dupes)
+	// fmt.Println("Dupes:", dupes)
 
 	sum := 0
 	for _, dupe := range dupes {
 		priority := toPriority(dupe)
-		fmt.Println("Priority:", dupe, priority)
+		// fmt.Println("Priority:", dupe, priority)
 		sum += priority
 	}
 
