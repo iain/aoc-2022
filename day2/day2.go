@@ -1,9 +1,8 @@
 package day2
 
 import (
-	"bufio"
+	"aoc-2022/shared"
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -87,28 +86,12 @@ func Main() {
 func getRounds(filename string) []Round {
 	rounds := []Round{}
 
-	file, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		if line := scanner.Text(); line == "" {
-			// one
-		} else {
-			// two
-			abs := strings.Fields(line)
-			opp := mappings[abs[0]]
-			you := response[abs[1]][opp]
-			rounds = append(rounds, Round{Opponent: opp, You: you})
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		panic(err)
+	lines := shared.ReadLines(filename)
+	for _, line := range lines {
+		abs := strings.Fields(line)
+		opp := mappings[abs[0]]
+		you := response[abs[1]][opp]
+		rounds = append(rounds, Round{Opponent: opp, You: you})
 	}
 
 	return rounds
