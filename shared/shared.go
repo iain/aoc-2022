@@ -3,6 +3,7 @@ package shared
 import (
 	"bufio"
 	"os"
+	"strconv"
 )
 
 // quickly get all lines of the file
@@ -27,4 +28,20 @@ func ReadLines(filename string) []string {
 	}
 
 	return lines
+}
+
+func StringToInt(str string) int {
+	i, err := strconv.Atoi(str)
+	if err != nil {
+		panic(err)
+	}
+	return i
+}
+
+func Reduce[T, M any](s []T, f func(M, T) M, initValue M) M {
+	acc := initValue
+	for _, v := range s {
+		acc = f(acc, v)
+	}
+	return acc
 }

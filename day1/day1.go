@@ -1,11 +1,9 @@
 package day1
 
 import (
-	"bufio"
+	"aoc-2022/shared"
 	"fmt"
-	"os"
 	"sort"
-	"strconv"
 )
 
 func Main() {
@@ -71,33 +69,19 @@ func topThree(elves Expedition) []Elf {
 	return elves[0:3]
 }
 
-func to_int(str string) int {
-	i, err := strconv.Atoi(str)
-	if err != nil {
-		panic(err)
-	}
-	return i
-}
-
 func GetCalories(filename string, ch chan Elf) {
-	file, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
+	lines := shared.ReadLines(filename)
 
 	elf := Elf{}
 
-	for scanner.Scan() {
-		if line := scanner.Text(); line == "" {
+	for _, line := range lines {
+		if line == "" {
 			// send complete elf data
 			ch <- elf
 			// make a new elf
 			elf = Elf{}
 		} else {
-			i := to_int(line)
+			i := shared.StringToInt(line)
 			foodItem := FoodItem{calories: i}
 			elf.foodItems = append(elf.foodItems, foodItem)
 		}
@@ -106,10 +90,6 @@ func GetCalories(filename string, ch chan Elf) {
 	// flush last elf
 	if len(elf.foodItems) > 0 {
 		ch <- elf
-	}
-
-	if err := scanner.Err(); err != nil {
-		panic(err)
 	}
 
 	close(ch)
