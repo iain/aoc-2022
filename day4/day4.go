@@ -16,12 +16,14 @@ func Main() {
 		assignment := lineToAssignment(line)
 		assignments = append(assignments, assignment)
 	}
-	fmt.Println("assignment", assignments)
+	// fmt.Println("assignment", assignments)
 
 	count := shared.Reduce(assignments, func(acc int, current Assignment) int {
-		if current.covers() {
+		if current.overlaps() {
+			fmt.Println("Overlap:", current)
 			return acc + 1
 		} else {
+			fmt.Println("No Overlap:", current)
 			return acc
 		}
 	}, 0)
@@ -43,8 +45,16 @@ func (a Assignment) covers() bool {
 	return a.one.covers(a.two) || a.two.covers(a.one)
 }
 
+func (a Assignment) overlaps() bool {
+	return a.one.overlaps(a.two) || a.two.overlaps(a.one)
+}
+
 func (r Range) covers(o Range) bool {
 	return r.from <= o.from && r.to >= o.to
+}
+
+func (r Range) overlaps(o Range) bool {
+	return r.from <= o.to && r.to >= o.from
 }
 
 func lineToAssignment(line string) Assignment {
