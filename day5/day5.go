@@ -11,6 +11,7 @@ type Crate struct {
 	below *Crate
 }
 
+// var stacks = [9]*Crate{}
 var stacks = [9]*Crate{}
 
 func Main() {
@@ -39,6 +40,7 @@ func Main() {
 		}
 	}
 
+	fmt.Println("---------------")
 	draw()
 	outcome()
 }
@@ -104,16 +106,22 @@ func doMoveFromLine(line string) {
 }
 
 func doMove(count, source, target int) {
-	// fmt.Println("moving", count, "from", source, "to", target)
-	for i := 0; i < count; i++ {
-		doSingleMove(source, target)
-	}
-	// draw()
-}
+	fmt.Println("moving", count, "from", source, "to", target)
 
-func doSingleMove(source, target int) {
-	currentCrate := *stacks[source]
-	stacks[source] = currentCrate.below
-	currentCrate.below = stacks[target]
-	stacks[target] = &currentCrate
+	currentCrate := stacks[source]
+
+	tailCrate := currentCrate
+
+	for i := 0; i < (count - 1); i++ {
+		tailCrate = tailCrate.below
+	}
+
+	// fmt.Println("tail:", tailCrate, "target", stacks[target], "current", currentCrate)
+
+	stacks[source] = tailCrate.below
+
+	tailCrate.below = stacks[target]
+
+	stacks[target] = currentCrate
+	draw()
 }
