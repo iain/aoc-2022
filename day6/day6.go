@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const markerSize = 14
+
 func Main() {
 	fmt.Println("Day 6")
 
@@ -17,24 +19,21 @@ func Main() {
 }
 
 func findMarker(chars []string) int {
-	for i := 0; i < len(chars)-4; i++ {
+	for i := 0; i < len(chars)-markerSize; i++ {
 		if isMarker(chars, i) {
-			return i + 4
+			return i + markerSize
 		}
 	}
 	return -1
 }
 
 func isMarker(chars []string, i int) bool {
-	// fmt.Println(chars[i+0], chars[i+1], chars[i+2], chars[i+3])
-	return true &&
-		chars[i+0] != chars[i+1] &&
-		chars[i+0] != chars[i+2] &&
-		chars[i+0] != chars[i+3] &&
-		chars[i+1] != chars[i+0] &&
-		chars[i+1] != chars[i+2] &&
-		chars[i+1] != chars[i+3] &&
-		chars[i+2] != chars[i+1] &&
-		chars[i+2] != chars[i+0] &&
-		chars[i+2] != chars[i+3]
+	fmt.Println(chars[i : markerSize+i])
+	uniq := map[string]bool{}
+
+	for _, char := range chars[i : markerSize+i] {
+		uniq[char] = true
+	}
+
+	return len(uniq) == markerSize
 }
