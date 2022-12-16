@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+const diskSize = 70_000_000
+const spaceNeeded = 30_000_000
+
 type Directory struct {
 	name    string
 	parent  *Directory
@@ -66,7 +69,7 @@ func Main() {
 
 	lines := shared.ReadLines("data/day7.input")
 	for _, line := range lines {
-		fmt.Println(line)
+		// fmt.Println(line)
 		switch {
 		case line == "$ cd /":
 			currentDir = rootDir
@@ -88,20 +91,24 @@ func Main() {
 		}
 	}
 
-	fmt.Println("total size", rootDir.getSize())
-	fmt.Println("allDirs", allDirs)
+	totalUsed := rootDir.getSize()
+	fmt.Println("total size used", totalUsed)
+	fmt.Println("total size free", diskSize-totalUsed)
 
-	sum := 0
+	deleteSize := diskSize
 
 	for _, dir := range allDirs {
 		size := dir.getSize()
-		if size < 100_000 {
-			sum += size
+		sizeFree := diskSize - totalUsed + size
+		if sizeFree > spaceNeeded {
+			fmt.Println("potential", dir.name, size)
+			if size < deleteSize {
+				deleteSize = size
+			}
 		}
-		fmt.Println(dir.name, ":", size)
 	}
 
-	fmt.Println("size sum", sum)
+	fmt.Println("size to delete", deleteSize)
 }
 
 func match(pattern string, line string) bool {
