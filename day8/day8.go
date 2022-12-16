@@ -25,47 +25,69 @@ func (f Forest) hasTree(x, y int) bool {
 	return ok
 }
 
-func (f Forest) visibleToTheLeft(p Point) bool {
+func (f Forest) visibleToTheLeft(p Point) int {
+	count := 0
+	current := f.heightAt(p.x, p.y)
+
 	for xx := p.x - 1; f.hasTree(xx, p.y); xx-- {
-		if f.trees[p] <= f.heightAt(xx, p.y) {
-			return false
+		count++
+		if height := f.heightAt(xx, p.y); height < current {
+		} else {
+			return count
 		}
 	}
-	return true
+	return count
 }
 
-func (f Forest) visibleToTheRight(p Point) bool {
+func (f Forest) visibleToTheRight(p Point) int {
+	count := 0
+	current := f.heightAt(p.x, p.y)
+
 	for xx := p.x + 1; f.hasTree(xx, p.y); xx++ {
-		if f.trees[p] <= f.heightAt(xx, p.y) {
-			return false
+		count++
+		if height := f.heightAt(xx, p.y); height < current {
+		} else {
+			return count
 		}
 	}
-	return true
+	return count
 }
 
-func (f Forest) visibleToTheTop(p Point) bool {
+func (f Forest) visibleToTheTop(p Point) int {
+	count := 0
+	current := f.heightAt(p.x, p.y)
+
 	for yy := p.y - 1; f.hasTree(p.x, yy); yy-- {
-		if f.trees[p] <= f.heightAt(p.x, yy) {
-			return false
+		count++
+		if height := f.heightAt(p.x, yy); height < current {
+		} else {
+			return count
 		}
 	}
-	return true
+	return count
 }
 
-func (f Forest) visibleToTheBottom(p Point) bool {
+func (f Forest) visibleToTheBottom(p Point) int {
+	count := 0
+	current := f.heightAt(p.x, p.y)
+
 	for yy := p.y + 1; f.hasTree(p.x, yy); yy++ {
-		if f.trees[p] <= f.heightAt(p.x, yy) {
-			return false
+		count++
+		if height := f.heightAt(p.x, yy); height < current {
+		} else {
+			return count
 		}
 	}
-	return true
+	return count
 }
 
-func (f Forest) isVisible(p Point) bool {
-	return f.visibleToTheLeft(p) ||
-		f.visibleToTheRight(p) ||
-		f.visibleToTheTop(p) ||
-		f.visibleToTheBottom(p)
+func (f Forest) scenicScore(p Point) int {
+	left := f.visibleToTheLeft(p)
+	right := f.visibleToTheRight(p)
+	top := f.visibleToTheTop(p)
+	bottom := f.visibleToTheBottom(p)
+	fmt.Println(p, f.heightAt(p.x, p.y), ":", "left:", left, "right:", right, "top:", top, "bottom:", bottom, "=", left*right*top*bottom)
+	return left * right * top * bottom
 }
 
 func Main() {
@@ -86,24 +108,24 @@ func Main() {
 		}
 	}
 
-	fmt.Println("Scanned forest", len(forest.trees))
+	fmt.Println("Scanned forest", len(forest.trees), width, height)
 	fmt.Println("")
 
-	numVisible := 0
+	maxScenic := 0
 
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			if forest.isVisible(Point{x, y}) {
-				fmt.Print("\033[32m")
-				numVisible++
-			} else {
-				fmt.Print("\033[31m")
+	for y := 1; y < height-1; y++ {
+		for x := 1; x < width-1; x++ {
+			scenicScore := forest.scenicScore(Point{x, y})
+			if scenicScore > maxScenic {
+				maxScenic = scenicScore
 			}
-			fmt.Print(forest.heightAt(x, y))
+			// fmt.Print(forest.heightAt(x, y))
 		}
-		fmt.Print("\033[0m\n")
+		// fmt.Print("\n")
 	}
 
-	fmt.Println("\nFound visible trees in forest:", numVisible)
+	forest.scenicScore(Point{2, 3})
+
+	fmt.Println("\nMax scenic score:", maxScenic)
 
 }
