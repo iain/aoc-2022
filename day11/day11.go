@@ -7,12 +7,12 @@ import (
 	"strings"
 )
 
-type MonkeyIndex int
-type WorryLevel int
+type MonkeyIndex int64
 type Operation string
-type Operand int
-type Test int
+type Operand int64
+type Test int64
 type MonkeyTarget map[bool]MonkeyIndex
+type WorryLevel uint64
 
 type Monkey struct {
 	index       MonkeyIndex
@@ -31,9 +31,17 @@ func Main() {
 
 	monkeyList := readMonkeys("day11/full.input")
 
-	for i := 0; i < 20; i++ {
-		fmt.Println("Playing round", i)
-		playRound(&monkeyList)
+	modulation := findModulation(&monkeyList)
+	fmt.Println(modulation)
+
+	for i := 0; i < 10_000; i++ {
+		playRound(&monkeyList, modulation)
+		if i%1000 == 0 {
+			fmt.Println("Playing round", i)
+			for _, monkey := range monkeyList {
+				fmt.Println(monkey)
+			}
+		}
 	}
 
 	fmt.Println("\nDone playing")
@@ -43,35 +51,49 @@ func Main() {
 		business = append(business, monkey.inspections)
 	}
 	sort.Ints(business)
+	fmt.Println(business)
 	fmt.Println(business[len(business)-1] * business[len(business)-2])
 }
 
-func playRound(monkeyList *MonkeyList) {
+func findModulation(monkeyList *MonkeyList) WorryLevel {
+	product := 1
+	for _, monkey := range *monkeyList {
+		product *= int(monkey.test)
+	}
+	return WorryLevel(product)
+}
+
+func playRound(monkeyList *MonkeyList, modulation WorryLevel) {
 	for i := 0; i < len(*monkeyList); i++ {
 		monkey := (*monkeyList)[MonkeyIndex(i)]
 		// fmt.Println("-- monkey", monkey.index)
 		for len(monkey.items) > 0 {
-			var item WorryLevel
+			var item, newItem WorryLevel
+
 			monkey.inspections++
 			item, monkey.items = monkey.items[0], monkey.items[1:]
-			operand := monkey.operand
-			if operand == Operand(-1) {
-				operand = Operand(item)
+			operand := WorryLevel(monkey.operand)
+			if monkey.operand == Operand(-1) {
+				operand = WorryLevel(item)
 			}
 			switch monkey.operation {
 			case "*":
-				item = item * WorryLevel(operand)
+				newItem = item * operand
 			case "+":
-				item = item + WorryLevel(operand)
+				newItem = item + operand
 			default:
 				panic("unknown operation " + monkey.operation)
 			}
-			item = item / 3
-			testResult := int(item) % int(monkey.test)
+			// item = item / 3
+			if item > newItem {
+				panic("wraparound, old: " + fmt.Sprint(item) + ", new: " + fmt.Sprint(newItem))
+			}
+			newItem = newItem % modulation
+			testResult := uint64(newItem) % uint64(monkey.test)
 			targetIndex := monkey.targets[testResult == 0]
 			// fmt.Println(">", testResult, targetIndex, item)
 			targetMonkey := (*monkeyList)[targetIndex]
-			targetMonkey.items = append(targetMonkey.items, item)
+			targetMonkey.items = append(targetMonkey.items, newItem)
 		}
 	}
 }
@@ -131,5 +153,6 @@ func parseWorryList(words []string) []WorryLevel {
 }
 
 func parseSingleWorry(word string) WorryLevel {
-	return WorryLevel(shared.StringToInt(strings.ReplaceAll(word, ",", "")))
+	var level int64 = int64(shared.StringToInt(strings.ReplaceAll(word, ",", "")))
+	return WorryLevel(level)
 }
