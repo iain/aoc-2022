@@ -12,72 +12,58 @@ type Point struct {
 	y int
 }
 
+type Knot struct {
+	index int
+	point Point
+}
+
+type KnotList [10]*Knot
+
 type History map[Point]bool
 
 func abs(x int) int {
 	return int(math.Abs(float64(x)))
 }
 
-func draw(head, tail Point, hist History) {
-	var minX int = 0
-	var maxX int = 0
-	var minY int = 0
-	var maxY int = 0
-
-	for p := range hist {
-		if p.x < minX {
-			minX = p.x
-		}
-		if p.x > maxX {
-			maxX = p.x
-		}
-		if p.y < minY {
-			minY = p.y
-		}
-		if p.y > maxY {
-			maxY = p.y
-		}
-	}
-
-	if head.x < minX {
-		minX = head.x
-	}
-	if head.x > maxX {
-		maxX = head.x
-	}
-	if head.y < minY {
-		minY = head.y
-	}
-	if head.y > maxY {
-		maxY = head.y
-	}
-	if tail.x < minX {
-		minX = tail.x
-	}
-	if tail.x > maxX {
-		maxX = tail.x
-	}
-	if tail.y < minY {
-		minY = tail.y
-	}
-	if tail.y > maxY {
-		maxY = tail.y
-	}
+func draw(knots KnotList, hist History) {
+	var minX int = -11
+	var maxX int = 15
+	var minY int = -15
+	var maxY int = 10
 
 	// fmt.Printf("Drawing from %d,%d to %d,%d\n", minX, minY, maxX, maxY)
 	fmt.Print("\n")
 
 	for y := minY; y <= maxY; y++ {
 		for x := minX; x <= maxX; x++ {
+			curr := Point{x, y}
 			switch {
-			case head == Point{x, y}:
+			case knots[0].point == curr:
 				fmt.Print("H")
-			case tail == Point{x, y}:
-				fmt.Print("T")
+			case knots[1].point == curr:
+				fmt.Print("1")
+			case knots[2].point == curr:
+				fmt.Print("2")
+			case knots[3].point == curr:
+				fmt.Print("3")
+			case knots[4].point == curr:
+				fmt.Print("4")
+			case knots[5].point == curr:
+				fmt.Print("5")
+			case knots[6].point == curr:
+				fmt.Print("6")
+			case knots[7].point == curr:
+				fmt.Print("7")
+			case knots[8].point == curr:
+				fmt.Print("8")
+			case knots[9].point == curr:
+				fmt.Print("9")
 			case x == 0 && y == 0:
 				fmt.Print("s")
+			case hist[curr]:
+				fmt.Print("\033[31m#\033[0m")
 			default:
-				fmt.Print(".")
+				fmt.Print("\033[36m.\033[0m")
 			}
 		}
 		fmt.Print("\n")
@@ -101,47 +87,47 @@ func move(head Point, tail Point) Point {
 
 	// still touching
 	case abs(head.x-tail.x) < 2 && abs(head.y-tail.y) < 2:
-		fmt.Println("touching")
+		// fmt.Println("touching")
 		return tail
 
 	// right
 	case head.x-tail.x > 1 && head.y-tail.y == 0:
-		fmt.Println("right")
+		// fmt.Println("right")
 		return Point{tail.x + 1, tail.y}
 
 	// left
 	case head.x-tail.x < -1 && head.y-tail.y == 0:
-		fmt.Println("left")
+		// fmt.Println("left")
 		return Point{tail.x - 1, tail.y}
 
 	// up
 	case head.x-tail.x == 0 && head.y-tail.y < -1:
-		fmt.Println("up")
+		// fmt.Println("up")
 		return Point{tail.x, tail.y - 1}
 
 	// down
 	case head.x-tail.x == 0 && head.y-tail.y > 1:
-		fmt.Println("down")
+		// fmt.Println("down")
 		return Point{tail.x, tail.y + 1}
 
 	// up-right
 	case head.x > tail.x && head.y < tail.y:
-		fmt.Println("up-right")
+		// fmt.Println("up-right")
 		return Point{tail.x + 1, tail.y - 1}
 
 	// up-left
 	case head.x < tail.x && head.y < tail.y:
-		fmt.Println("up-left")
+		// fmt.Println("up-left")
 		return Point{tail.x - 1, tail.y - 1}
 
 	// down-right
 	case head.x > tail.x && head.y > tail.y:
-		fmt.Println("down-left")
+		// fmt.Println("down-left")
 		return Point{tail.x + 1, tail.y + 1}
 
 	// down-left
 	case head.x < tail.x && head.y > tail.y:
-		fmt.Println("down-left")
+		// fmt.Println("down-left")
 		return Point{tail.x - 1, tail.y + 1}
 
 	default:
@@ -152,8 +138,12 @@ func move(head Point, tail Point) Point {
 func Main() {
 	fmt.Println("Day 9")
 
-	head := Point{0, 0}
-	tail := Point{0, 0}
+	knots := KnotList{}
+
+	for j := 0; j < cap(knots); j++ {
+		knots[j] = &Knot{point: Point{0, 0}, index: j}
+	}
+
 	history := make(History)
 
 	lines := shared.ReadLines("day9/full.input")
@@ -161,27 +151,36 @@ func Main() {
 		fields := strings.Fields(line)
 		direction := fields[0]
 		amount := shared.StringToInt(fields[1])
-		fmt.Println("dir", direction, "amount", amount)
+		fmt.Println("==", direction, amount, "==")
 		for i := 0; i < amount; i++ {
+
+			head := knots[0].point
+
 			switch direction {
 			case "R":
 				head = Point{head.x + 1, head.y}
-				tail = move(head, tail)
 			case "L":
 				head = Point{head.x - 1, head.y}
-				tail = move(head, tail)
 			case "U":
 				head = Point{head.x, head.y - 1}
-				tail = move(head, tail)
 			case "D":
 				head = Point{head.x, head.y + 1}
-				tail = move(head, tail)
 			default:
 				panic("No such command: " + line)
 			}
-			history[tail] = true
-			// draw(head, tail, history)
+			knots[0].point = head
+
+			for j := 0; j < len(knots)-1; j++ {
+				knots[j+1].point = move(knots[j].point, knots[j+1].point)
+			}
+
+			// knots[j].point = head
+			// knots[j+1].point = tail
+			history[knots[9].point] = true
 		}
+
+		draw(knots, history)
+
 	}
 
 	fmt.Println(len(history))
