@@ -4,7 +4,6 @@ import (
 	"aoc-2022/shared"
 	"fmt"
 	"strings"
-	"time"
 )
 
 type Point struct {
@@ -60,18 +59,18 @@ func Main() {
 	formation := parse()
 	draw(formation)
 	for {
-		time.Sleep(100 * time.Millisecond)
+		// time.Sleep(1 * time.Millisecond)
 		tick(formation)
-		draw(formation)
+		// draw(formation)
 	}
 }
 
 func tick(f Formation) {
 	s := Point{500, 0}
 	for {
-		if s.y > f.maxY {
-			panic(fmt.Sprintf("done! %d sands", len(f.sands)))
-		}
+		// if s.y > f.maxY {
+		// 	panic(fmt.Sprintf("done! %d sands", len(f.sands)))
+		// }
 		if f.occupied(s.x, s.y+1) {
 			if f.occupied(s.x-1, s.y+1) {
 				if f.occupied(s.x+1, s.y+1) {
@@ -115,7 +114,7 @@ func draw(f Formation) {
 
 func parse() Formation {
 	f := Formation{minX: 500, minY: 0, rocks: make(Coords), sands: make(Coords)}
-	for _, line := range shared.ReadLines("day14/sample.input") {
+	for _, line := range shared.ReadLines("day14/full.input") {
 		coords := strings.Split(line, " -> ")
 		for i := 1; i < len(coords); i++ {
 
